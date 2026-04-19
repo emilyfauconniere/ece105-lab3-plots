@@ -187,16 +187,30 @@ def save_all(seed: Union[int, str], out_dir: str = '.', prefix: str = 'sensor') 
     return scatter_path, hist_path, box_path
 
 
-def _cli():
+def main(argv=None):
+    """Main entrypoint: parse CLI args, generate plots, and save PNGs.
+
+    Parameters
+    ----------
+    argv : sequence of str or None
+        Optional argument list to parse (like sys.argv[1:]). If ``None``, the
+        real command-line arguments are used.
+
+    Returns
+    -------
+    tuple of str
+        Paths to the saved (scatter_path, hist_path, boxplot_path).
+    """
     parser = argparse.ArgumentParser(description='Generate synthetic sensor plots and save PNGs.')
     parser.add_argument('--seed', default='0707', help='RNG seed (int or string).')
     parser.add_argument('--out-dir', default='.', help='Output directory for PNGs.')
     parser.add_argument('--prefix', default='sensor', help='Filename prefix for saved images.')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    scatter_p, hist_p, box_p = save_all(args.seed, args.out_dir, args.prefix)
-    print('Saved:', scatter_p, hist_p, box_p)
+    paths = save_all(args.seed, args.out_dir, args.prefix)
+    return paths
 
 
 if __name__ == '__main__':
-    _cli()
+    scatter_p, hist_p, box_p = main()
+    print('Saved:', scatter_p, hist_p, box_p)
