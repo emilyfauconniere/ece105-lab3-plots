@@ -91,17 +91,6 @@ def plot_scatter(ax: Axes, timestamps: np.ndarray, sensor_a: np.ndarray, sensor_
     return None
 
 
-if __name__ == '__main__':
-    # quick manual test
-    import matplotlib.pyplot as plt
-
-    ts, a, b = generate_data('0707')
-    fig, ax = plt.subplots(figsize=(8,4))
-    plot_scatter(ax, ts, a, b)
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_histogram(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, bins: int = 30, range=None) -> None:
     """Draw overlapping histograms for two sensors on the provided Axes.
 
@@ -132,7 +121,6 @@ def plot_histogram(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, bins: i
     two distributions can be compared. Sets axis labels, a title, a legend,
     and a light grid. Modifies the Axes in place.
     """
-    # determine common range if not provided
     if range is None:
         data_min = min(np.min(sensor_a), np.min(sensor_b))
         data_max = max(np.max(sensor_a), np.max(sensor_b))
@@ -147,6 +135,7 @@ def plot_histogram(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, bins: i
     ax.legend()
     ax.grid(alpha=0.3)
     return None
+
 
 def plot_boxplot(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, showfliers: bool = True) -> None:
     """Draw side-by-side boxplots for two sensors on the provided Axes.
@@ -194,7 +183,6 @@ def plot_boxplot(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, showflier
         patch.set_facecolor(color)
         patch.set_alpha(0.6)
 
-    # style other elements for readability
     for whisker in bp.get('whiskers', []):
         whisker.set_color('black')
     for cap in bp.get('caps', []):
@@ -214,6 +202,44 @@ def plot_boxplot(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, showflier
     ax.grid(axis='y', alpha=0.3)
     return None
 
-# Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
-# the scatter plot from the notebook onto the given Axes object.
-# NumPy-style docstring. Modifies ax in place, returns None.
+
+def main(seed: Union[int, str] = '0707') -> None:
+    """Generate synthetic data and create example plots.
+
+    Parameters
+    ----------
+    seed : int or str, optional
+        Seed for the synthetic data RNG. Defaults to ``'0707'`` for
+        reproducible output.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Creates a figure with three subplots: scatter (time vs temperature),
+    overlapping histograms, and side-by-side boxplots. Displays the figure
+    with Matplotlib's interactive window.
+    """
+    import matplotlib.pyplot as plt
+
+    ts, a, b = generate_data(seed)
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+    # scatter
+    plot_scatter(axes[0], ts, a, b)
+
+    # histogram
+    plot_histogram(axes[1], a, b, bins=30)
+
+    # boxplot
+    plot_boxplot(axes[2], a, b, showfliers=True)
+
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()
