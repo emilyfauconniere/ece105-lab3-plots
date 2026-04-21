@@ -100,6 +100,120 @@ if __name__ == '__main__':
     plot_scatter(ax, ts, a, b)
     plt.tight_layout()
     plt.show()
+
+
+def plot_histogram(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, bins: int = 30, range=None) -> None:
+    """Draw overlapping histograms for two sensors on the provided Axes.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The Axes object to draw on (modified in place).
+
+    sensor_a : numpy.ndarray, shape (n,)
+        Sensor A temperature readings.
+
+    sensor_b : numpy.ndarray, shape (n,)
+        Sensor B temperature readings.
+
+    bins : int, optional
+        Number of histogram bins (default is 30).
+
+    range : tuple or None, optional
+        The lower and upper range of the bins. If None, the range is inferred from the data.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Draws semi-transparent overlapping histograms with subtle edges so the
+    two distributions can be compared. Sets axis labels, a title, a legend,
+    and a light grid. Modifies the Axes in place.
+    """
+    # determine common range if not provided
+    if range is None:
+        data_min = min(np.min(sensor_a), np.min(sensor_b))
+        data_max = max(np.max(sensor_a), np.max(sensor_b))
+        range = (data_min, data_max)
+
+    ax.hist(sensor_a, bins=bins, range=range, alpha=0.6, color='C0', label='Sensor A', edgecolor='black', linewidth=0.5)
+    ax.hist(sensor_b, bins=bins, range=range, alpha=0.6, color='C1', label='Sensor B', edgecolor='black', linewidth=0.5)
+
+    ax.set_xlabel('Temperature (°C)')
+    ax.set_ylabel('Count')
+    ax.set_title('Temperature Distribution')
+    ax.legend()
+    ax.grid(alpha=0.3)
+    return None
+
+def plot_boxplot(ax: Axes, sensor_a: np.ndarray, sensor_b: np.ndarray, showfliers: bool = True) -> None:
+    """Draw side-by-side boxplots for two sensors on the provided Axes.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The Axes object to draw on (modified in place).
+
+    sensor_a : numpy.ndarray, shape (n,)
+        Sensor A temperature readings.
+
+    sensor_b : numpy.ndarray, shape (n,)
+        Sensor B temperature readings.
+
+    showfliers : bool, optional
+        Whether to show outlying points (fliers). Default is True.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Draws boxplots for Sensor A and Sensor B side-by-side, applies
+    distinct colors (C0/C1) and a light grid. The function modifies the
+    provided Axes in place and returns None.
+    """
+    data = [sensor_a, sensor_b]
+
+    bp = ax.boxplot(
+        data,
+        positions=[1, 2],
+        widths=0.6,
+        patch_artist=True,
+        showfliers=showfliers,
+        medianprops={"color": "black"},
+        boxprops={"linewidth": 0.8},
+        whiskerprops={"linewidth": 0.8},
+        capprops={"linewidth": 0.8},
+    )
+
+    colors = ["C0", "C1"]
+    for patch, color in zip(bp.get('boxes', []), colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.6)
+
+    # style other elements for readability
+    for whisker in bp.get('whiskers', []):
+        whisker.set_color('black')
+    for cap in bp.get('caps', []):
+        cap.set_color('black')
+    for median in bp.get('medians', []):
+        median.set_color('black')
+        median.set_linewidth(1.0)
+    for flier in bp.get('fliers', []):
+        flier.set_markerfacecolor('gray')
+        flier.set_markeredgecolor('black')
+        flier.set_markersize(4)
+
+    ax.set_xticks([1, 2])
+    ax.set_xticklabels(['Sensor A', 'Sensor B'])
+    ax.set_ylabel('Temperature (°C)')
+    ax.set_title('Temperature Distribution (boxplot)')
+    ax.grid(axis='y', alpha=0.3)
+    return None
+
 # Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
 # the scatter plot from the notebook onto the given Axes object.
 # NumPy-style docstring. Modifies ax in place, returns None.
