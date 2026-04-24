@@ -91,27 +91,62 @@ def plot_scatter(ax: Axes, timestamps: np.ndarray, sensor_a: np.ndarray, sensor_
     return None
 
 
-if __name__ == '__main__':
-    # quick manual test
+def main(seed: Union[int, str] = '0707') -> None:
+    """Generate synthetic data and create example plots in a 2×2 grid.
+
+    Parameters
+    ----------
+    seed : int or str, optional
+        Seed for the synthetic data RNG. Defaults to ``'0707'`` for
+        reproducible output.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Creates a figure with a 2×2 grid of subplots: scatter (time vs temperature),
+    overlapping histograms, side-by-side boxplots, and a summary cell
+    containing basic statistics. Displays the figure with Matplotlib's
+    interactive window.
+    """
     import matplotlib.pyplot as plt
 
-    ts, a, b = generate_data('0707')
-    fig, ax = plt.subplots(figsize=(8,4))
-    plot_scatter(ax, ts, a, b)
+    ts, a, b = generate_data(seed)
+
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+
+    ax_scatter = axes[0, 0]
+    ax_hist = axes[0, 1]
+    ax_box = axes[1, 0]
+    ax_summary = axes[1, 1]
+
+    # scatter
+    plot_scatter(ax_scatter, ts, a, b)
+
+    # histogram
+    plot_histogram(ax_hist, a, b, bins=30)
+
+    # boxplot
+    plot_boxplot(ax_box, a, b, showfliers=True)
+
+    # summary: show simple statistics in the fourth panel
+    mean_a = float(np.mean(a))
+    std_a = float(np.std(a, ddof=0))
+    mean_b = float(np.mean(b))
+    std_b = float(np.std(b, ddof=0))
+
+    ax_summary.axis('off')
+    summary_text = (
+        f"Sensor A:\n  mean = {mean_a:.2f} °C\n  std = {std_a:.2f} °C\n\n"
+        f"Sensor B:\n  mean = {mean_b:.2f} °C\n  std = {std_b:.2f} °C"
+    )
+    ax_summary.text(0.5, 0.5, summary_text, ha='center', va='center', fontsize=11)
+
     plt.tight_layout()
     plt.show()
-# Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
-# the scatter plot from the notebook onto the given Axes object.
-# NumPy-style docstring. Modifies ax in place, returns None.
 
-# Create plot_histogram(sensor_a, sensor_b, timestamps, ax) that draws
-# the histogram of temperature readings from the notebook onto the given Axes object.
-# NumPy-style docstring. Modifies ax in place, returns None.
 
-# Create plot_boxplot(sensor_a, sensor_b, timestamps, ax) that draws
-# the box plot of temperature readings from the notebook onto the given Axes object.
-# NumPy-style docstring. Modifies ax in place, returns None.
-
-# Create main() that generates data, creates a 1x3 subplot figure,
-# calls each plot function, adjusts layout, and saves as sensor_analysis.png
-# at 150 DPI with tight bounding box.
+if __name__ == '__main__':
+    main()
